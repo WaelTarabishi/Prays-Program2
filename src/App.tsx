@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import { Toaster } from "react-hot-toast";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Home from "./component/home";
 import Login from "./component/login";
@@ -10,12 +9,7 @@ import Login from "./component/login";
 
 function App() {
   const queryClient = new QueryClient();
-  const token = Cookies.get("prayerTimeIdlebTimeAdminToken");
-  const navigate = useNavigate();
-  console.log(token);
-  if (!token) {
-    navigate("/login");
-  }
+
   return (
     <>
       <QueryClientProvider client={queryClient}>

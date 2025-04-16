@@ -5,7 +5,6 @@ import Cookies from "js-cookie";
 const Login = () => {
   const token = Cookies.get("prayerTimeIdlebTimeAdminToken");
   const navigate = useNavigate();
-  console.log(token);
   if (token) {
     navigate("/");
   }
