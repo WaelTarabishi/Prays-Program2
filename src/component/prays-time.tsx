@@ -76,7 +76,7 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
   }, []);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_APP_SECRET}/api/prayer-times`, {
+    fetch(`${import.meta.env.VITE_APIKEY}/api/prayer-times`, {
       headers: {
         Authorization: token ? `Bearer ${token}` : "",
       },
