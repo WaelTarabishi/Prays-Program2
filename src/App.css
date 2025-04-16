@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+html{
+    background-image: url("../public/background.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+        
+}
+
+@font-face {
+    font-family: 'QuranFont';
+    src: url('/fonts/quran.ttf') format('truetype');
+    /* Adjust the path to your Quran font file */
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  .prayerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+  }
+  
+  .frameContainer {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .frame {
+    width: 300px;
+    height: auto;
+    display: block;
+  }
+  
+  .textOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .prayerTitle {
+    font-family: 'QuranFont', Arial, sans-serif;
+    font-size: 24px;
+    color: #333;
+    margin: 0 0 10px 0;
+    direction: rtl;
+  }
+  
+  .prayerTime {
+    font-family: 'QuranFont', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+  }
