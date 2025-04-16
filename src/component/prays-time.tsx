@@ -75,6 +75,8 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
     return () => clearInterval(timer);
   }, []);
 
+  console.log(import.meta.env.VITE_APIKEY);
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_APIKEY}/api/prayer-times`, {
       headers: {
