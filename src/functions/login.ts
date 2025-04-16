@@ -1,5 +1,5 @@
 export async function LoginFn(info: FormData) {
-  const apiUrl = `${import.meta.env.VITE_APP_SECRET}/api/login`;
+  const apiUrl = `${import.meta.env.VITE_APIKEY}/api/login`;
   console.log(apiUrl);
   let errorMessage;
   try {
