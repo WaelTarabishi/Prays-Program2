@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { Sun } from "lucide-react";
 interface Prayer {
   prayer?: string;
   adhan?: string;
@@ -201,28 +202,43 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
                     : "bg-amber-700/10 border border-amber-600/30"
                 }`}>
                 <div className="flex justify-between md:text-[calc(1.1vw+1rem)]">
-                  <span
-                    className={`${
-                      prayer.isNext ? "text-emerald-600" : "text-amber-600"
-                    } flex items-center justify-center gap-x-2 font-semibold`}>
-                    <img
-                      src="./minaret2.png"
-                      className="w-[calc(1.2vw+0.6em)]"
-                      alt="Adhan Icon"
-                    />
-                    أذان: {prayer.adhan}
-                  </span>
-                  <span
-                    className={`${
-                      prayer.isNext ? "text-emerald-600" : "text-amber-600"
-                    } flex items-center justify-center gap-x-2 font-semibold`}>
-                    <img
-                      src="./worship.png"
-                      className="w-[calc(1.2vw+0.6em)]"
-                      alt="Iqamah Icon"
-                    />
-                    إقامة: {prayer.iqama}
-                  </span>
+                  {prayer.prayer === "الشروق" ? (
+                    <span
+                      className={`${
+                        prayer.isNext ? "text-emerald-600" : "text-amber-600"
+                      } flex items-center justify-center gap-x-2 font-semibold`}>
+                      <Sun className="w-[calc(1.2vw+0.6em)] h-[calc(1.2vw+0.6em)] font-extralight   mt-2" />
+                      الساعة: {prayer.adhan}
+                    </span>
+                  ) : (
+                    <span
+                      className={`${
+                        prayer.isNext ? "text-emerald-600" : "text-amber-600"
+                      } flex items-center justify-center gap-x-2 font-semibold`}>
+                      <img
+                        src="./minaret2.png"
+                        className="w-[calc(1.2vw+0.6em)]"
+                        alt="Adhan Icon"
+                      />
+                      أذان: {prayer.adhan}
+                    </span>
+                  )}
+
+                  {prayer.prayer === "الشروق" ? (
+                    <></>
+                  ) : (
+                    <span
+                      className={`${
+                        prayer.isNext ? "text-emerald-600" : "text-amber-600"
+                      } flex items-center justify-center gap-x-2 font-semibold`}>
+                      <img
+                        src="./worship.png"
+                        className="w-[calc(1.2vw+0.6em)]"
+                        alt="Iqamah Icon"
+                      />
+                      إقامة: {prayer.iqama}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
