@@ -4,11 +4,13 @@ import { LoginFn } from "../functions/login";
 import { useAuthStore } from "../store/auth-store";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
   const login = useAuthStore((state) => state.login);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -37,9 +39,10 @@ export function LoginForm({
     },
     onSuccess: async (data) => {
       login(data.token);
-      toast.success("مرحباً بعودتك!");
-      if (data.user.role == "user") {
-        navigate("/");
+      Cookies.set("role", data.user.role);
+      // toast.success("مرحباً بعودتك!");
+      if (data.user.role == "admin") {
+        navigate("/dashboard");
       } else {
         navigate("/");
       }

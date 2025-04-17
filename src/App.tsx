@@ -6,6 +6,9 @@ import "./App.css";
 import Home from "./component/home";
 import Login from "./component/login";
 import Cookies from "js-cookie";
+import Dashboard from "./component/dashboard";
+import HadithSettings from "./component/hadith-settings";
+import IqamehSettings from "./component/iqameh-settings";
 
 function App() {
   const queryClient = new QueryClient();
@@ -58,6 +61,15 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/dashboard">
+            <Route index element={<Dashboard />} />
+            <Route
+              path="/dashboard/hadith-settings"
+              element={<HadithSettings />}></Route>
+            <Route
+              path="/dashboard/iqameh-settings"
+              element={<IqamehSettings />}></Route>
+          </Route>
         </Routes>
       </QueryClientProvider>
       <Toaster

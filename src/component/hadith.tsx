@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
+import Cookies from "js-cookie";
 const Hadith = () => {
+  const token = Cookies.get("prayerTimeIdlebTimeAdminToken");
+
+  const [hadith, setHadith] = useState<any[]>([]);
+  //@ts-ignore
+  const [loading, setLoading] = useState(true);
+
   const [currentHadith, setCurrentHadith] = useState<number>(0);
   //@ts-ignore
   const [isChanging, setIsChanging] = useState<boolean>(false);
@@ -39,6 +45,24 @@ const Hadith = () => {
   ];
 
   useEffect(() => {
+    setLoading(true);
+    fetch(`${import.meta.env.VITE_APIKEY}/api/hadiths/getAll`, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setHadith(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setIsChanging(true);
       setTimeout(() => {
@@ -48,7 +72,7 @@ const Hadith = () => {
     }, 15000); // Change hadith every 6 seconds (increased from 4s to give more reading time)
     return () => clearInterval(interval);
   }, []);
-
+  console.log(hadith);
   return (
     <div className="flex md:flex-row flex-col justify-center items-center md:gap-10   px-[calc(1vw)] ">
       <motion.img
