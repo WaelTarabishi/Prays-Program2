@@ -77,7 +77,7 @@ const Dates = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}>
       <motion.div
-        className="text-[calc(1.5vw+2.5rem)] text-amber-700 font-bold"
+        className="text-[calc(1.9vw+2.9rem)] -mt-9 text-amber-700 font-bold"
         animate={{ scale: [1, 1.02, 1] }}
         transition={{
           duration: 2,
@@ -90,7 +90,7 @@ const Dates = () => {
 
       {/* Hijri Date Display */}
       <motion.div
-        className="md:text-[calc(1vw+0.5rem)] rounded-md bg-amber-700/10 border border-amber-600/30 text-amber-600 font-bold px-3 py-1 shadow-sm"
+        className="md:text-[calc(1vw+1.2rem)] rounded-md bg-amber-700/10 border border-amber-600/30 text-amber-600 font-bold px-3 py-1 shadow-sm"
         whileHover={{
           backgroundColor: "rgba(180, 83, 9, 0.15)",
           scale: 1.02,

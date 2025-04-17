@@ -30,7 +30,7 @@ const ReaminingTime = ({ remainingTime }: { remainingTime: number }) => {
           repeat: remainingTime < 5 ? Infinity : 0,
         }}>
         <motion.div
-          className="bg-amber-50 px-4 py-1 rounded-md text-[calc(0.8vw+0.7rem)] mr-2 font-bold"
+          className="bg-amber-50 px-4 py-1 rounded-md text-[calc(1.4vw+0.5rem)] mr-2 font-bold"
           style={{
             background: remainingTime < 1 ? "#fef3c7" : "#fef3c7",
             backgroundSize: "200% 100%",
@@ -50,13 +50,11 @@ const ReaminingTime = ({ remainingTime }: { remainingTime: number }) => {
           {formatRemainingTime(remainingTime)}
         </motion.div>
 
-        {/* <div className="h-[calc(0.8vw+1rem)] w-[1px] bg-amber-600/30"></div> */}
-
-        <div className="text-amber-800 font-bold text-[calc(0.7vw+0.5rem)] ml-1">
+        <div className="text-amber-800 font-bold text-[calc(1.4vw+0.5rem)] ml-1">
           الوقت المتبقي للإقامة
         </div>
       </motion.div>
-    </motion.div>
+  </motion.div>
   );
 };
 
