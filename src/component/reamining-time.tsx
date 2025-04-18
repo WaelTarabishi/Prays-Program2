@@ -2,11 +2,14 @@ import { motion } from "framer-motion";
 
 const ReaminingTime = ({ remainingTime }: { remainingTime: number }) => {
   // Format remaining time for Iqama
-  const formatRemainingTime = (minutes: number) => {
-    const mins = Math.floor(minutes);
-    const secs = Math.floor((minutes * 60) % 60);
+  const formatRemainingTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    console.log(mins);
+    const secs = seconds % 60;
+    console.log(`${mins}:${secs.toString().padStart(2, "0")}`, "hello 2");
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
   return (
     <motion.div
       className="flex justify-center mb-9  "
@@ -54,7 +57,7 @@ const ReaminingTime = ({ remainingTime }: { remainingTime: number }) => {
           الوقت المتبقي للإقامة
         </div>
       </motion.div>
-  </motion.div>
+    </motion.div>
   );
 };
 

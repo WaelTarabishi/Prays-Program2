@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { Sun } from "lucide-react";
+import React, { useEffect, useState } from "react";
 interface Prayer {
   prayer?: string;
   adhan?: string;
@@ -14,19 +14,34 @@ interface Prayer {
 const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
   onNumberChange,
 }) => {
-  const [loading, setLoading] = useState(true);
-  const [prayers, setPrayers] = useState<Prayer[]>([]);
+  const [prayers, setPrayers] = useState<Prayer[]>([
+    // { prayer: "الفجر", adhan: "01:36", iqama: "40" },
+  ]);
+  //@ts-ignore
   const [isRemain, setIsRemain] = useState(false);
-  //@ts-ignore
-  const [currentTime, setCurrentTime] = useState("");
-  //@ts-ignore
-  const [currentDate, setCurrentDate] = useState("");
-  //@ts-ignore
-  const [hijriDate, setHijriDate] = useState("");
 
   const token = Cookies.get("prayerTimeIdlebTimeAdminToken");
+  //!
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${import.meta.env.VITE_APIKEY}/api/prayer-times`, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // Mark the next prayer when data is loaded
+        const updatedPrayers = markNextPrayer(data.prayers);
+        setPrayers(updatedPrayers);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  // Format current time as HH:mm
   const getCurrentHHMM = () => {
     const now = new Date();
     return now.toTimeString().slice(0, 5);
@@ -38,7 +53,104 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
     return h * 60 + m;
   };
 
+  // Function to mark which prayer is next
+  const markNextPrayer = (prayersList: Prayer[]) => {
+    if (!prayersList || prayersList.length === 0) return prayersList;
+
+    const nowHHMM = getCurrentHHMM();
+    const nowMinutes = timeToMinutes(nowHHMM);
+
+    let nextPrayerIndex = -1;
+    let smallestDifference = Infinity;
+
+    // Find the next prayer (closest future prayer)
+    prayersList.forEach((prayer, index) => {
+      if (!prayer.adhan) return;
+
+      const adhanMinutes = timeToMinutes(prayer.adhan);
+
+      // If prayer is in the future
+      if (adhanMinutes > nowMinutes) {
+        const difference = adhanMinutes - nowMinutes;
+        if (difference < smallestDifference) {
+          smallestDifference = difference;
+          nextPrayerIndex = index;
+        }
+      }
+    });
+
+    // If no future prayer found today, the first prayer of the day is next
+    if (nextPrayerIndex === -1 && prayersList.length > 0) {
+      nextPrayerIndex = 0;
+    }
+
+    // Mark the next prayer
+    return prayersList.map((prayer, index) => ({
+      ...prayer,
+      isNext: index === nextPrayerIndex,
+    }));
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nowHHMM = getCurrentHHMM();
+      const nowMinutes = timeToMinutes(nowHHMM);
+
+      prayers.forEach((prayer) => {
+        //@ts-ignore
+        const adhanMinutes = timeToMinutes(prayer.adhan);
+        const iqamaMinutes = prayer.iqama;
+
+        if (
+          nowMinutes >= adhanMinutes &&
+          //@ts-ignore
+          nowMinutes < adhanMinutes + parseInt(iqamaMinutes) &&
+          isRemain == false
+        ) {
+          //@ts-ignore
+          onNumberChange(adhanMinutes + parseInt(iqamaMinutes) - nowMinutes);
+          //@ts-ignore
+          isRemain = true;
+        }
+        //@ts-ignore
+        if (adhanMinutes + parseInt(iqamaMinutes) - nowMinutes == 0) {
+          //@ts-ignore
+          isRemain = false;
+        }
+      });
+
+      // Update which prayer is next every minute
+      const updatedPrayers = markNextPrayer(prayers);
+      setPrayers(updatedPrayers);
+    }, 10000); // every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [prayers]);
   // Update current time every second
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, "0");
+      const m = now.getMinutes().toString().padStart(2, "0");
+      const s = now.getSeconds().toString().padStart(2, "0");
+      setCurrentTime(`${h}:${m}:${s}`);
+    };
+
+    updateClock();
+    const timer = setInterval(updateClock, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  //@ts-ignore
+  const [currentDate, setCurrentDate] = useState("");
+  //@ts-ignore
+  const [hijriDate, setHijriDate] = useState("");
+  //@ts-ignore
+  const [currentTime, setCurrentTime] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  console.log(currentTime);
   useEffect(() => {
     const updateCurrentTime = () => {
       const now = new Date();
@@ -53,27 +165,8 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch prayer times
   useEffect(() => {
-    setLoading(true);
-    fetch(`${import.meta.env.VITE_APIKEY}/api/prayer-times`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : "",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setPrayers(data.prayers);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setLoading(false);
-      });
-  }, []);
-
-  // Set current date
-  useEffect(() => {
+    // Set current Gregorian date
     const date = new Date();
     setCurrentDate(
       date.toLocaleDateString("ar-SA", {
@@ -84,68 +177,74 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
       })
     );
 
-    // Simulate Hijri date - in a real app, you would fetch this
+    // Simulate fetching prayer times
+    // In a real app, you would fetch from an API like Aladhan API
+    const mockPrayerTimes = {
+      Fajr: "04:30",
+      Sunrise: "06:15",
+      Dhuhr: "12:30",
+      Asr: "15:45",
+      Maghrib: "18:20",
+      Isha: "19:45",
+    };
+
+    // Simulate Hijri date
     setHijriDate("١٥ رمضان ١٤٤٥");
-  }, []);
 
-  // Check for next prayer and calculate remaining time
-  useEffect(() => {
-    if (prayers.length === 0) return;
+    // Update prayer times and determine next prayer
+    const currentHour = date.getHours();
+    const currentMinute = date.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-    const interval = setInterval(() => {
-      const nowHHMM = getCurrentHHMM();
-      const nowMinutes = timeToMinutes(nowHHMM);
+    const updatedPrayers = prayers.map((prayer) => {
+      const [hour, minute] = mockPrayerTimes[
+        //@ts-ignore
+        prayer.name as keyof typeof mockPrayerTimes
+      ]
+        .split(":")
+        .map(Number);
+      const prayerTimeInMinutes = hour * 60 + minute;
 
-      let foundNext = false;
+      return {
+        ...prayer,
+        //@ts-ignore
+        time: mockPrayerTimes[prayer.name as keyof typeof mockPrayerTimes],
+        isNext: prayerTimeInMinutes > currentTimeInMinutes,
+      };
+    });
 
-      prayers.forEach((prayer) => {
-        if (!prayer.adhan) return;
+    // Find the next prayer
+    const nextPrayerIndex = updatedPrayers.findIndex((prayer) => prayer.isNext);
+    if (nextPrayerIndex !== -1) {
+      updatedPrayers[nextPrayerIndex].isNext = true;
 
-        const adhanMinutes = timeToMinutes(prayer.adhan);
-        const iqamaMinutes = prayer.iqama ? parseInt(prayer.iqama) : 0;
+      // Calculate remaining time until next prayer
+      const [nextHour, nextMinute] = updatedPrayers[nextPrayerIndex].time
+        .split(":")
+        .map(Number);
+      const nextPrayerTimeInMinutes = nextHour * 60 + nextMinute;
+      const remainingMinutes = nextPrayerTimeInMinutes - currentTimeInMinutes;
 
-        if (
-          nowMinutes >= adhanMinutes &&
-          nowMinutes < adhanMinutes + iqamaMinutes &&
-          !isRemain
-        ) {
-          onNumberChange(adhanMinutes + iqamaMinutes - nowMinutes);
-          setIsRemain(true);
-          foundNext = true;
+      const hours = Math.floor(remainingMinutes / 60);
+      const minutes = remainingMinutes % 60;
+
+      updatedPrayers[
+        nextPrayerIndex
+        //@ts-ignore
+      ].remainingTime = `${hours} ساعة و ${minutes} دقيقة`;
+
+      // Reset any other prayers that might be marked as next
+      for (let i = 0; i < updatedPrayers.length; i++) {
+        if (i !== nextPrayerIndex) {
+          updatedPrayers[i].isNext = false;
         }
-
-        if (adhanMinutes + iqamaMinutes - nowMinutes === 0 && isRemain) {
-          setIsRemain(false);
-        }
-      });
-
-      // Update prayers to mark the next one
-      const updatedPrayers = prayers.map((prayer) => {
-        if (!prayer.adhan) return prayer;
-
-        const adhanMinutes = timeToMinutes(prayer.adhan);
-        return {
-          ...prayer,
-          isNext: adhanMinutes > nowMinutes && !foundNext,
-        };
-      });
-
-      // Find the first prayer that's next
-      const nextPrayerIndex = updatedPrayers.findIndex((p) => p.isNext);
-      if (nextPrayerIndex !== -1) {
-        // Make sure only one prayer is marked as next
-        updatedPrayers.forEach((p, i) => {
-          if (i !== nextPrayerIndex) {
-            updatedPrayers[i] = { ...p, isNext: false };
-          }
-        });
-        setPrayers(updatedPrayers);
       }
-    }, 1000);
+    }
 
-    return () => clearInterval(interval);
-  }, [prayers, isRemain]);
-
+    setPrayers(updatedPrayers);
+    setLoading(false);
+  }, []);
+  console.log(prayers);
   if (loading) {
     return (
       <div className="flex relative z-10 flex-col items-center justify-center h-[calc(30vh)]">
@@ -181,17 +280,36 @@ const PrayerTimes: React.FC<{ onNumberChange: (value: number) => void }> = ({
               }}></div>
 
             <div className="p-[calc(1.2vw+0.3rem)]">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mb-[calc(0.5vw+0.2rem)]">
                 <div className="flex items-center justify-center">
+                  {/* Prayer indicator dot */}
                   <div
                     className={`w-[calc(0.6vw+0.3rem)] h-[calc(0.6vw+0.3rem)] rounded-full mr-[calc(0.5vw+0.25rem)] ${
-                      prayer.isNext ? "bg-emerald-600" : "bg-amber-600"
+                      prayer.isNext
+                        ? "bg-emerald-600 animate-pulse shadow-lg shadow-emerald-200"
+                        : "bg-amber-600"
                     }`}></div>
-                  <span
-                    style={{ fontSize: "calc(1.6vw + 1rem)" }}
-                    className={`font-bold text-amber-800 mr-[calc(0.5vw+0.2rem)]`}>
-                    {prayer.prayer}
-                  </span>
+
+                  {/* Prayer name and next prayer indicator */}
+                  <div className="flex flex-col mr-4">
+                    <div className="flex items-center gap-x-[calc(0.8vw+0.2rem)]">
+                      <span
+                        style={{ fontSize: "calc(1.6vw + 1rem)" }}
+                        className={`font-bold ${
+                          prayer.isNext ? "text-emerald-800" : "text-amber-800"
+                        }`}>
+                        {prayer.prayer}
+                      </span>
+
+                      {prayer.isNext && (
+                        <span
+                          className="bg-emerald-100 mt-4 text-emerald-700 px-[calc(0.5vw+0.3rem)] py-[calc(0.2vw+0.1rem)] rounded-full font-semibold border border-emerald-200 shadow-sm"
+                          style={{ fontSize: "calc(0.8vw + 0.5rem)" }}>
+                          الصلاة القادمة
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
